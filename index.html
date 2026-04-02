@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Báo Cáo Kết Quả Học Viên - Anh Ngữ Pollan Academy</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f4f8; margin: 0; padding: 20px; display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        
+        /* Cấu trúc Giao diện Nhập liệu (Form) */
+        .form-container { background-color: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 350px; flex-shrink: 0; position: sticky; top: 20px; height: fit-content;}
+        .form-container h2 { text-align: center; color: #5d7c32; border-bottom: 2px solid #5d7c32; padding-bottom: 10px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 3px; font-weight: bold; color: #333; font-size: 14px;}
+        .form-group input, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        .form-group textarea { height: 80px; resize: vertical; }
+        
+        /* Các nút bấm */
+        .btn-print { width: 100%; padding: 12px; background-color: #5d7c32; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background-color 0.3s; margin-top: 15px; }
+        .btn-print:hover { background-color: #4a6228; }
+        .btn-image { width: 100%; padding: 12px; background-color: #ff9800; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background-color 0.3s; margin-top: 10px; }
+        .btn-image:hover { background-color: #e68a00; }
+        .btn-image-jpeg { background-color: #2196F3; }
+        .btn-image-jpeg:hover { background-color: #0b7dda; }
+
+        /* Cấu trúc Báo cáo (Report) */
+        .report-preview { width: 100%; max-width: 800px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); flex-grow: 1; }
+        .printable-area { background-color: white; width: 100%; padding: 30px; box-sizing: border-box; }
+        
+        /* Bảng chung */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; table-layout: fixed; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { font-weight: normal; font-size: 14px; }
+        
+        /* Header */
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px;}
+        .logo-section { display: flex; align-items: center; gap: 10px; }
+        .logo-section img { height: 60px; max-width: 150px; } 
+        .logo-text { color: #5d7c32; font-weight: bold; font-size: 16px; margin: 0; }
+        .logo-subtext { font-size: 10px; color: #777; font-style: italic; margin: 0; }
+        .card-titles { text-align: right; }
+        .card-titles h1 { font-size: 20px; color: #333; font-weight: normal; margin: 0; }
+        .card-titles p { font-size: 14px; color: #777; margin: 0; font-style: italic; }
+
+        /* Thông tin sinh viên */
+        .student-info-section { border: 1px solid #ddd; border-radius: 8px; margin-bottom: 25px; overflow: hidden; }
+        .info-header { background-color: #5d7c32; color: white; padding: 10px 15px; font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+        .info-grid { display: flex; border-bottom: 1px solid #ddd; }
+        .info-label { width: 150px; font-weight: bold; color: #5d7c32; padding: 8px 15px; background-color: #f9fdf5; flex-shrink: 0;}
+        .info-value { flex-grow: 1; padding: 8px 15px; border-left: 1px solid #ddd; color: #333; font-weight: bold; }
+
+        /* Kết quả bài kiểm tra */
+        .test-results-section { border: 1px solid #ddd; border-radius: 8px; margin-bottom: 25px; overflow: hidden; }
+        .test-header { background-color: #5d7c32; color: white; padding: 10px 15px; font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+        .results-container { display: flex; gap: 15px; padding: 15px; box-sizing: border-box; }
+        
+        /* Phần Bảng điểm */
+        .scores-table { flex: 0 0 45%; }
+        .scores-table table { margin: 0; width: 100%; border: 1px solid #ddd; border-collapse: collapse;}
+        .scores-table th, .scores-table td { border: 1px solid #ddd; padding: 8px 10px; text-align: left;}
+        .scores-table thead th { background-color: #f1f1f1; color: #5d7c32; font-weight: bold; text-align: center; font-size: 13px;}
+        .scores-table tr td:first-child { width: 65%; color: #333; display: flex; align-items: center; gap: 8px; border-right: none;} 
+        .scores-table tr td:nth-child(2) { width: 35%; color: #5d7c32; font-weight: bold; font-size: 16px; text-align: center;} 
+
+        /* Phần Ô Tròn kết quả */
+        .result-box-wrapper { flex: 1; border: 1px solid #ddd; border-radius: 12px; display: flex; flex-direction: column; align-items: center; padding: 15px; box-sizing: border-box; background-color: #fafafa;}
+        .result-box-title { color: #333; font-weight: bold; text-align: center; width: 100%; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 15px; }
+        .result-ellipse { background-color: #9ccc65; border-radius: 50%; width: 110px; height: 110px; display: flex; align-items: center; justify-content: center; border: 4px solid #f9fdf5; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); }
+        .result-score { font-size: 28px; font-weight: bold; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
+        .result-footer { text-align: center; font-size: 12px; color: #777; margin-top: 10px; width: 100%; border-top: 1px solid #ddd; padding-top: 8px; }
+
+        /* Nhận xét của giáo viên */
+        .teacher-comments-section { border: 1px solid #ddd; border-radius: 8px; margin-bottom: 25px; overflow: hidden; }
+        .comment-header { background-color: #5d7c32; color: white; padding: 10px 15px; font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+        .comments-body { padding: 15px; background-color: #f9fdf5; min-height: 100px; color: #333; font-size: 14px; position: relative; }
+        .comments-list { list-style: circle; padding-left: 20px; margin: 0; font-size: 14px; }
+        .comments-list li { margin-bottom: 8px; position: relative; }
+
+        /* Kết quả cuối cùng */
+        .final-result-section { border: 1px solid #ddd; border-radius: 8px; margin-bottom: 25px; overflow: hidden; }
+        .final-header { background-color: #5d7c32; color: white; padding: 10px 15px; font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+        .final-body { padding: 15px; text-align: center; font-size: 40px; color: #9ccc65; font-weight: bold; text-transform: uppercase; } 
+
+        /* Cài đặt In (Print) */
+        @media print {
+            body { background-color: white; padding: 0; flex-direction: column; align-items: center; }
+            .form-container, header { display: none !important; }
+            .report-preview { width: 210mm; padding: 15mm; box-shadow: none; border: none; }
+            .printable-area { padding: 0; }
+            .scores-table table { border: 1px solid #000; }
+            .scores-table th, .scores-table td { border: 1px solid #000; -webkit-print-color-adjust: exact; print-color-adjust: exact;}
+            .comments-list li { color: #000; }
+            .final-body { color: #5d7c32 !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>Nhập Thông Tin</h2>
+    
+    <h3>1. Học Viên</h3>
+    <div class="form-group"><label for="name">Tên Học Viên:</label><input type="text" id="name" placeholder="Ví dụ: Lê Nguyễn Thủy Tiên" oninput="updateReport()"></div>
+    <div class="form-group"><label for="englishName">Tên Tiếng Anh:</label><input type="text" id="englishName" placeholder="Ví dụ: TEA TEA" oninput="updateReport()"></div>
+    <div class="form-group"><label for="class">Lớp:</label><input type="text" id="class" placeholder="Ví dụ: CỐP PHI" oninput="updateReport()"></div>
+    <div class="form-group"><label for="attendance">Điểm danh (%):</label><input type="number" id="attendance" placeholder="100" max="100" min="0" oninput="updateReport()"></div>
+
+    <h3>2. Điểm Số</h3>
+    <div class="form-group"><label for="listening">Nghe (trên 25):</label><input type="number" id="listening" placeholder="25" max="25" min="0" oninput="updateReport()"></div>
+    <div class="form-group"><label for="reading">Đọc (trên 30):</label><input type="number" id="reading" placeholder="30" max="30" min="0" oninput="updateReport()"></div>
+    <div class="form-group"><label for="speaking">Nói (trên 10):</label><input type="number" id="speaking" placeholder="10" max="10" min="0" oninput="updateReport()"></div>
+    <div class="form-group"><label for="writing">Viết (trên 10):</label><input type="number" id="writing" placeholder="10" max="10" min="0" oninput="updateReport()"></div>
+
+    <h3>3. Nhận Xét & Kết Quả</h3>
+    <div class="form-group"><label for="comments">Nhận xét (mỗi dòng 1 câu):</label><textarea id="comments" placeholder="Dòng 1..." oninput="updateReport()"></textarea></div>
+    <div class="form-group"><label for="finalStatus">Kết quả cuối cùng:</label><input type="text" id="finalStatus" placeholder="Ví dụ: PASS" oninput="updateReport()"></div>
+
+    <button class="btn-print" onclick="window.print()">🖨️ In / Xuất PDF</button>
+    <button class="btn-image" onclick="exportImage('png')">🖼️ Tải ảnh PNG (Nét cao)</button>
+    <button class="btn-image btn-image-jpeg" onclick="exportImage('jpeg')">🖼️ Tải ảnh JPEG (Nhẹ máy)</button>
+</div>
+
+<div class="report-preview">
+    <div class="printable-area" id="capture-area">
+        
+        <div class="header">
+            <div class="logo-section">
+                <img src="pollan3.png" alt="Pollan Academy Logo">
+                <div>
+                    <p class="logo-text">Anh Ngữ Pollan Academy<sup>®</sup></p>
+                    <p class="logo-subtext">Place of Language learn and nature</p>
+                </div>
+            </div>
+            <div class="card-titles">
+                <h1>STUDENT REPORT CARD</h1>
+                <p>Student Progress Report</p>
+            </div>
+        </div>
+
+        <div class="student-info-section">
+            <div class="info-header">👤 STUDENT INFORMATION</div>
+            <div class="info-grid"><div class="info-label">Student Name:</div><div class="info-value" id="pName">...</div></div>
+            <div class="info-grid"><div class="info-label">English Name:</div><div class="info-value" id="pEnglishName">...</div></div>
+            <div class="info-grid"><div class="info-label">Class:</div><div class="info-value" id="pClass">...</div></div>
+            <div class="info-grid"><div class="info-label">Attendance:</div><div class="info-value" id="pAttendance">...</div></div>
+        </div>
+
+        <div class="test-results-section">
+            <div class="test-header">🏆 FINAL TEST RESULT</div>
+            <div class="results-container">
+                <div class="scores-table">
+                    <table>
+                        <thead><tr><th>Skill</th><th>Score</th></tr></thead>
+                        <tbody>
+                            <tr><td>🎧 Listening</td><td id="pListening">0/25</td></tr>
+                            <tr><td>📖 Reading</td><td id="pReading">0/30</td></tr>
+                            <tr><td>🗣️ Speaking</td><td id="pSpeaking">0/10</td></tr>
+                            <tr><td>✏️ Writing</td><td id="pWriting">0/10</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="result-box-wrapper">
+                    <div class="result-box-title">Result</div>
+                    <div class="result-ellipse"><span class="result-score" id="pResult">0/100</span></div>
+                    <div class="result-footer">Total Score</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="teacher-comments-section">
+            <div class="comment-header">💬 TEACHER'S COMMENTS</div>
+            <div class="comments-body">
+                <ul class="comments-list" id="pComments">
+                    <li>.</li>
+                    <li>.</li>
+                    <li>.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="final-result-section">
+            <div class="final-header">✅ FINAL RESULT</div>
+            <div class="final-body" id="pFinalStatus">---</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateReport() {
+        // Lấy dữ liệu
+        const values = {
+            name: document.getElementById('name').value || '...',
+            englishName: document.getElementById('englishName').value || '...',
+            cls: document.getElementById('class').value || '...',
+            attendance: document.getElementById('attendance').value || '...',
+            listening: parseInt(document.getElementById('listening').value) || 0,
+            reading: parseInt(document.getElementById('reading').value) || 0,
+            speaking: parseInt(document.getElementById('speaking').value) || 0,
+            writing: parseInt(document.getElementById('writing').value) || 0,
+            comments: document.getElementById('comments').value || '',
+            finalStatus: document.getElementById('finalStatus').value || '---' 
+        };
+
+        // Đổ dữ liệu vào Info
+        document.getElementById('pName').innerText = values.name;
+        document.getElementById('pEnglishName').innerText = values.englishName;
+        document.getElementById('pClass').innerText = values.cls;
+        document.getElementById('pAttendance').innerText = values.attendance + '%';
+
+        // Đổ điểm
+        document.getElementById('pListening').innerText = values.listening + '/25';
+        document.getElementById('pReading').innerText = values.reading + '/30';
+        document.getElementById('pSpeaking').innerText = values.speaking + '/10';
+        document.getElementById('pWriting').innerText = values.writing + '/10';
+
+        // Tổng điểm
+        const total = values.listening + values.reading + values.speaking + values.writing;
+        document.getElementById('pResult').innerText = total + '/100';
+
+        // Đổ kết quả cuối cùng
+        document.getElementById('pFinalStatus').innerText = values.finalStatus;
+
+        // Đổ nhận xét
+        const list = document.getElementById('pComments');
+        list.innerHTML = '';
+        if (values.comments.trim()) {
+            values.comments.split('\n').forEach(c => {
+                if(c.trim()) {
+                    const li = document.createElement('li');
+                    li.innerText = '💚 ' + c; 
+                    list.appendChild(li);
+                }
+            });
+        } else {
+            for(let i=0; i<3; i++) {
+                const li = document.createElement('li');
+                li.innerText = '.';
+                list.appendChild(li);
+            }
+        }
+    }
+    updateReport(); // Cập nhật ban đầu
+
+    // HÀM XUẤT ẢNH MỚI
+    function exportImage(format) {
+        // Thay đổi dòng chữ trên nút để báo hiệu đang xử lý
+        const originalText = event.target.innerText;
+        event.target.innerText = "⏳ Đang tạo ảnh...";
+        
+        const captureArea = document.getElementById('capture-area');
+        
+        html2canvas(captureArea, {
+            scale: 2, // Tăng chất lượng ảnh lên gấp đôi cho nét
+            useCORS: true, // Hỗ trợ tải logo nếu logo nằm ở link web
+            backgroundColor: "#ffffff" // Đảm bảo nền trắng
+        }).then(canvas => {
+            // Khôi phục chữ trên nút
+            event.target.innerText = originalText;
+            
+            // Lấy tên học viên để đặt tên file
+            let studentName = document.getElementById('name').value.trim();
+            if (!studentName) studentName = "HocVien";
+            
+            // Tạo link tải ảo và tự động click
+            const link = document.createElement('a');
+            link.download = `BangDiem_${studentName}.${format}`;
+            link.href = canvas.toDataURL(`image/${format}`, 1.0);
+            link.click();
+        }).catch(err => {
+            alert("Đã có lỗi xảy ra khi tạo ảnh: " + err);
+            event.target.innerText = originalText;
+        });
+    }
+</script>
+
+</body>
+</html>
