@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Báo Cáo Kết Quả Học Viên - Anh Ngữ Pollan Academy</title>
+    <title>Student Report Card - Anh Ngữ Pollan Academy</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f4f8; margin: 0; padding: 20px; display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
@@ -157,13 +157,17 @@
                             <tr><td>📖 Reading</td><td id="pReading">0/30</td></tr>
                             <tr><td>🗣️ Speaking</td><td id="pSpeaking">0/10</td></tr>
                             <tr><td>✏️ Writing</td><td id="pWriting">0/10</td></tr>
+                            <tr style="background-color: #f9fdf5;">
+                                <td style="color: #5d7c32; font-weight: bold;">📌 Total Score</td>
+                                <td id="pTotalScore" style="color: #5d7c32; font-weight: bold;">0/75</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
                 <div class="result-box-wrapper">
                     <div class="result-box-title">Result</div>
-                    <div class="result-ellipse"><span class="result-score" id="pResult">0/100</span></div>
-                    <div class="result-footer">Total Score</div>
+                    <div class="result-ellipse"><span class="result-score" id="pResult">0%</span></div>
+                    <div class="result-footer">Percentage</div>
                 </div>
             </div>
         </div>
